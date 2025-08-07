@@ -1,290 +1,129 @@
-Welcome to your new TanStack app! 
+# EasyMineSweep
 
-# Getting Started
+Modern Minesweeper built with React, TypeScript, Vite, Material UI, and TanStack Router.
 
-To run this application:
+This project implements a classic Minesweeper with a clean UI, difficulty presets, first-click safety, flagging, and a straightforward game loop. It is designed as a small, readable codebase showcasing component-driven UI and clear game logic.
+
+## Features
+
+- Difficulty presets: easy (9x9, 10 mines), medium (16x16, 40 mines), hard (16x30, 99 mines)
+- First-click safe: the first revealed cell and its neighbors are guaranteed safe
+- Reveal and flag modes, plus right-click to flag
+- Win/lose detection with simple alerts
+- Responsive grid UI using Material UI
+- Type-safe state and logic in TypeScript
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite 6 for dev/build/preview
+- Material UI (MUI) for UI components
+- TanStack Router for routing and devtools
+- Vitest + Testing Library (DOM/React) for tests
+
+## Getting Started
+
+Requirements:
+
+- Node.js 18+ (Node 20+ recommended)
+- npm (or a compatible package manager)
+
+Clone and install:
 
 ```bash
+git clone <your-repo-url>
+cd EasyMineSweep/EasyMineSweep
 npm install
-npm run start  
 ```
 
-# Building For Production
+Run the app in development mode:
 
-To build this application for production:
+```bash
+npm run dev
+```
+
+The app runs on `http://localhost:3000` by default.
+
+Build for production:
 
 ```bash
 npm run build
 ```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+Preview the production build locally:
 
 ```bash
-npm run test
+npm run serve
 ```
 
-## Styling
-
-This project uses CSS for styling.
-
-
-
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
+Run tests:
 
 ```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
+npm test
 ```
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
+## How to Play
 
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+- Select a difficulty, then press Play in the title bar
+- Left click a cell to reveal
+- Right click a cell to toggle a flag
+- You win when all non-mine cells are revealed
+- You lose if you reveal a mine
 
-// ...
+## Game Logic Overview
 
-const queryClient = new QueryClient();
+Key source files:
 
-// ...
+- `src/components/game/game.logic.ts` – core game state and actions
+- `src/components/game/game.tsx` – game container and controls
+- `src/components/board/board.tsx` – renders the grid
+- `src/components/cell/cell.tsx` – renders a single cell
+- `src/components/title-bar/title-bar.tsx` – title, difficulty selector, and Play button
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
+State shape (`BoardState`):
 
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
+- `rows`, `cols`, `mines`
+- `grid: Cell[][]` where each `Cell` has `{ r, c, mine, revealed, flagged, count }`
+- `status: 'playing' | 'won' | 'lost'`
+- `flags`, `revealedCount`, `firstClickSafe`
+
+Logic highlights:
+
+- `createGame(rows, cols, mines)` creates an empty board and defers mine placement
+- On the first reveal, mines are placed excluding the clicked cell and its 8 neighbors (first-click safety)
+- Each cell’s `count` is computed as the number of adjacent mines
+- `revealCell(state, r, c)` performs an iterative flood reveal for zero-count regions and checks for win/lose
+- `toggleFlag(state, r, c)` toggles flags and updates the remaining indicator
+
+## Scripts
+
+From `EasyMineSweep/EasyMineSweep`:
+
+- `npm run dev` – start dev server on port 3000
+- `npm start` – alias for dev
+- `npm run build` – build with Vite and TypeScript
+- `npm run serve` – preview the production build
+- `npm test` – run unit tests (Vitest)
+
+## Project Structure (selected)
+
+```
+EasyMineSweep/
+  EasyMineSweep/
+    src/
+      components/
+        board/
+        cell/
+        game/
+        title-bar/
+      routes/
+      main.tsx
+      styles.css
+    index.html
+    package.json
 ```
 
-You can also add TanStack Query Devtools to the root route (optional).
+## Notes
 
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+- The router devtools are enabled by default and render at the root for convenience.
+- The project is private and does not include a license declaration. Add a license if you plan to distribute.

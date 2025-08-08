@@ -15,13 +15,9 @@ import { createGame, revealCell, toggleFlag } from './game.logic';
 import Board from '../board/board';
 import type { BoardState } from '../board/board.types';
 
-type Props = {
-  rows: number;
-  cols: number;
-  mines: number;
-};
 
-export default function Game({ rows, cols, mines }: Props) {
+
+export default function Game({ rows, cols, mines }: Readonly<GameProps>) {
   const [state, setState] = React.useState<BoardState>(() =>
     createGame(rows, cols, mines),
   );

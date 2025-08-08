@@ -13,14 +13,9 @@ import {
   MenuItem,
 } from '@mui/material';
 import { useState } from 'react';
+import type { TitleBarProps, Difficulty } from './title-bar.types';
 
-export type Difficulty = 'easy' | 'medium' | 'hard';
-
-type Props = {
-  onStart?: (difficulty: Difficulty) => void;
-};
-
-export default function TitleBar({ onStart }: Props) {
+export default function TitleBar({ onStart }: Readonly<TitleBarProps>) {
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
 
   const handleStart = () => {
